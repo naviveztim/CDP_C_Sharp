@@ -1,0 +1,4 @@
+- Very fast to train
+- Very small model size 
+- Easily add new classes 
+- High accuracy 

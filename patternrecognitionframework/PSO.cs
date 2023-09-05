@@ -63,7 +63,7 @@ namespace Core
         // Swarm definition 
         public CandidateShapelet BestParticle;
         private readonly List<CandidateShapelet> _swarm = new List<CandidateShapelet>();
-        private readonly Random _ran = new Random(42); 
+        private readonly Random _ran = new Random(); 
         // private readonly CircularListIterator _ran = new CircularListIterator(); // TEST ONLY!!! 
         private int _maxParticleLength;
         private int _minParticleLength;
