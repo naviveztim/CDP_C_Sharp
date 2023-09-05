@@ -1,7 +1,0 @@
-D:\Research\CDP_c_sharp_github\Framework\bin\Release\Framework.dll
-D:\Research\CDP_c_sharp_github\Framework\bin\Release\Framework.pdb
-D:\Research\CDP_c_sharp_github\Framework\bin\Release\Utilities.dll
-D:\Research\CDP_c_sharp_github\Framework\bin\Release\Utilities.pdb
-D:\Research\CDP_c_sharp_github\Framework\obj\Release\Framework.csprojResolveAssemblyReference.cache
-D:\Research\CDP_c_sharp_github\Framework\obj\Release\Framework.dll
-D:\Research\CDP_c_sharp_github\Framework\obj\Release\Framework.pdb

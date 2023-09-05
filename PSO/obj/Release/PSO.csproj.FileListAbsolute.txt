@@ -1,7 +1,0 @@
-D:\Research\CDP_c_sharp_github\PSO\bin\Release\PSO.dll
-D:\Research\CDP_c_sharp_github\PSO\bin\Release\PSO.pdb
-D:\Research\CDP_c_sharp_github\PSO\bin\Release\Utilities.dll
-D:\Research\CDP_c_sharp_github\PSO\bin\Release\Utilities.pdb
-D:\Research\CDP_c_sharp_github\PSO\obj\Release\PSO.csprojResolveAssemblyReference.cache
-D:\Research\CDP_c_sharp_github\PSO\obj\Release\PSO.dll
-D:\Research\CDP_c_sharp_github\PSO\obj\Release\PSO.pdb
