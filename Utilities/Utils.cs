@@ -9,6 +9,33 @@ using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Utilities
 {
+    [Serializable]
+    public class TimeSeries
+    {
+        public int ClassIndex
+        {
+            get; set;
+        }
+
+        public double[] Values
+        {
+            get; set;
+        }
+    }
+
+    public class HistogramItem
+    {
+        public int ClassIndex
+        {
+            get; set;
+        }
+
+        public double Distance
+        {
+            get; set;
+        }
+    }
+
     public class Utils
     {
         public static int MAX_ANSWER_LENGTH = 1; 

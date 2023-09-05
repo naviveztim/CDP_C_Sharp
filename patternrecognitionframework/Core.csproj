@@ -71,7 +71,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Shapelet.cs" />
     <Compile Include="ShapeletClassifier.cs" />
-    <Compile Include="ShapeletClassifierBase.cs" />
     <Compile Include="ShapeletsDataMiningUtils.cs" />
     <Compile Include="TypicalPath.cs" />
   </ItemGroup>
