@@ -1,65 +1,80 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
+//using System.IO;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
+//using System.Text;
+//using System.Text.RegularExpressions;
 using Utilities;
 
 namespace Framework
 {
+    /*
     public enum DataMiningMethod
     {
         None,
         PsoShapelets
-    }
+    }*/
 
-    public class ManagingAgent : IAgent
+    public class ManagingAgent //: IClassifier
     {
-        public List<IAgent> Agents { get; private set; }
+        public List<ClassificationAgent> Agents { get; private set; }
         
-        public DataSet TrainDataSet { get; private set; }
+        // public DataSet TrainDataSet { get; private set; }
         
-        public string WorkingFolder { get; private set; }
+        // public string WorkingFolder { get; private set; }
         
-        public Func<IList<int>, DataSet, DataMiningMethod, IClassifier> CreateAndTrainClassifier { get; private set; }
+        // public Func<IList<int>, DataSet, DataMiningMethod, IClassifier> CreateAndTrainClassifier { get; private set; }
         
-        public DataMiningMethod MiningMethod { get; private set; }
+        // public DataMiningMethod MiningMethod { get; private set; }
         
         public bool ClassifiyWithPath { get; set; }
 
         private readonly List<Tuple<int, string>> _decisionPatterens = new List<Tuple<int, string>>(); // TEST 
 
-        public ManagingAgent(DataSet dataSet, DataMiningMethod dataMiningMethod = DataMiningMethod.None, 
-                             Func<IList<int>, DataSet, DataMiningMethod, IClassifier> createAndTrainClassifier = null)
+        public ManagingAgent(/*DataSet dataSet
+                             , DataMiningMethod dataMiningMethod = DataMiningMethod.None*/
+                             /*, Func<IList<int>
+                                    , DataSet
+                                    , DataMiningMethod
+                                    , IClassifier> createAndTrainClassifier = null*/)
         {
-            Agents = new List<IAgent>();
-            TrainDataSet = dataSet;
-            WorkingFolder = dataSet.DirectoryName;
-            CreateAndTrainClassifier = createAndTrainClassifier;
-            MiningMethod = dataMiningMethod; 
+            Agents = new List<ClassificationAgent>();
+            //TrainDataSet = dataSet;
+            //WorkingFolder = dataSet.DirectoryName;
+            //CreateAndTrainClassifier = createAndTrainClassifier;
+            //MiningMethod = dataMiningMethod; 
         }
 
-        public void Add(IAgent agent)
+        public void Add(ClassificationAgent agent)
         {
+            /*
             if (agent is ManagingAgent)
             {
                 (agent as ManagingAgent).TrainDataSet = TrainDataSet;
                 (agent as ManagingAgent).WorkingFolder = WorkingFolder;
                 (agent as ManagingAgent).CreateAndTrainClassifier = CreateAndTrainClassifier;
                 (agent as ManagingAgent).MiningMethod = MiningMethod; 
-            }
+            }*/
             
             Agents.Add(agent); 
         }
 
-        public void Train(DataSet dataSet)
+        /*
+        public bool LoadClassifier()
+        {
+            throw new NotImplementedException();
+        }*/
+
+        /*
+        public bool Train(DataSet dataSet)
         {
             foreach (var agent in Agents)
             {
                 agent.Train(dataSet);
             }
-        }
+
+            return true;
+        }*/
 
         public int Classify(TimeSeries timeSeries)
         {
@@ -81,7 +96,7 @@ namespace Framework
             {
                 var results = Agents.Select(agent => agent.Classify(timeSeries)).ToList();
 
-                mostPopularIndexes = getMostPopularIndexes(results);    
+                mostPopularIndexes = _getMostPopularIndexes(results);    
             }
             
             mostPopularIndexes.RemoveAll(i => i == int.MinValue/*-1*/); // TEST 
@@ -94,7 +109,7 @@ namespace Framework
             return int.MinValue;  //-1; // TEST 
         }
 
-        public void PrepareTrainingPatterns()
+        public void PrepareTrainingPatterns(DataSet TrainDataSet)
         {
             foreach (var i in TrainDataSet.ClassIndexes)
             {
@@ -106,17 +121,19 @@ namespace Framework
             }
         } // TEST 
 
+        /*
         public string ClassifyWithPath(TimeSeries timeSeries)
         {
             throw new NotImplementedException();
-        }
+        }*/
 
+        /*
         public string GetClassificationPath(int classIndex, int trial)
         {
             throw new NotImplementedException();
-        }
+        }*/
 
-        private static List<int> getMostPopularIndexes(IEnumerable<int> results)
+        private static List<int> _getMostPopularIndexes(IEnumerable<int> results)
         {
             var resultsArray = results.ToArray();
 
@@ -141,6 +158,7 @@ namespace Framework
             return mostPopularIndexes;
         }
 
+        /*
         private static string fromDecisionPatternToFeaturesArray(string decisionPattern)
         {
             var featuresStr = Regex.Replace(decisionPattern, ".{1}", "$0,");
@@ -148,7 +166,7 @@ namespace Framework
             featuresStr = featuresStr.Remove(featuresStr.Length - 1);
 
             return featuresStr;
-        }
+        }*/
 
         private List<int> getMostPopularIndexesSimilarityCoefficient(string result)
         {
@@ -173,7 +191,7 @@ namespace Framework
 
             var popularIndexes = similarityDistances.Select(t => t.Item1);
 
-            var mostPopularIndexes = getMostPopularIndexes(popularIndexes);
+            var mostPopularIndexes = _getMostPopularIndexes(popularIndexes);
 
             if (mostPopularIndexes.Count() > 1)
             {

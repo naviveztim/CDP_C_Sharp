@@ -14,7 +14,7 @@ namespace Core
         private readonly int _maxLength;
         private readonly string _classificationTreePath; 
         private BTree<Shapelet> _bestClassificationTree;
-        private IAgent _agent;
+        private IClassifier _agent;
         public TypicalPath TypicalPath = new TypicalPath();
 
         private TimeSeries[] _trainTimeSeries;

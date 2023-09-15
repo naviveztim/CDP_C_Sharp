@@ -40,8 +40,11 @@ namespace Framework
         
         public int Step { get; private set; }
 
-        public DataSet(IList<int> classIndexes, IEnumerable<IEnumerable<double>> timeSeriesMatrix, 
-                       int compressionIndex, bool useSignal, bool normalize )
+        public DataSet(IList<int> classIndexes
+                       , IEnumerable<IEnumerable<double>> timeSeriesMatrix
+                       , int compressionIndex
+                       , bool useSignal
+                       , bool normalize )
         {
             DirectoryName = Directory.GetCurrentDirectory();
             ClassIndexes = classIndexes.Distinct().ToList();

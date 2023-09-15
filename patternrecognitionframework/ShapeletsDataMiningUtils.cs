@@ -95,7 +95,7 @@ namespace Core
             return int.MinValue;  //-1; // TEST 
         }
 
-        public static IClassifier CreateAndTrainClassifier(IList<int> classesInDataSet
+        public static ShapeletClassifier CreateAndTrainClassifier(IList<int> classesInDataSet
                                                            , DataSet dataSet)
         {
             var classifier = new ShapeletClassifier(dataSet.MinLength
