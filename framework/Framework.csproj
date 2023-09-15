@@ -67,7 +67,6 @@
   <ItemGroup>
     <Compile Include="ClassificationAgent.cs" />
     <Compile Include="IClassifier.cs" />
-    <Compile Include="DataSet.cs" />
     <Compile Include="ManagingAgent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

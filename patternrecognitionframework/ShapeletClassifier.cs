@@ -2,19 +2,19 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Framework;
+// using Framework;
 using Utilities;
 
 namespace Core
 {
     // Implements IClassifier functionality
-    public /*abstract*/ class ShapeletClassifier : IClassifier
+    public /*abstract*/ class ShapeletClassifier //: IClassifier
     {
         private readonly int _minLength;
         private readonly int _maxLength;
         private readonly string _classificationTreePath; 
         private BTree<Shapelet> _bestClassificationTree;
-        private IClassifier _agent;
+        // private IClassifier _agent;
         public TypicalPath TypicalPath = new TypicalPath();
 
         private TimeSeries[] _trainTimeSeries;

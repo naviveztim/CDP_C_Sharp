@@ -41,7 +41,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BTree.cs" />
+    <Compile Include="DataSet.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TypicalPath.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
