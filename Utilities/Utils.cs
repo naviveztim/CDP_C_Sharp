@@ -39,8 +39,7 @@ namespace Utilities
     public class Utils
     {
         public static int MAX_ANSWER_LENGTH = 1; 
-        //public const double TALE_BREAKER = 0.0001; 
-
+        
         public static double EuclidianDistance(double[] array1, double[] array2, double currentMinDistance)
         {
             if ((array1 == null) || (array2 == null))

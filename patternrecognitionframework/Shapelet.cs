@@ -3,7 +3,7 @@
 namespace Core
 {
     [Serializable]
-    public class Shapelet : IComparable<Shapelet>
+    public class Shapelet: IComparable<Shapelet>
     {
         public Shapelet()
         {
@@ -58,7 +58,7 @@ namespace Core
                 return 1;
             }
 
-            return -2; // This item should note be put into the tree 
+            return -2;  
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Utilities
 {
@@ -137,7 +136,5 @@ namespace Utilities
                 PrintPreorder(node.Right, ref traverseString);
             }
         }
-
-        
     }
 }

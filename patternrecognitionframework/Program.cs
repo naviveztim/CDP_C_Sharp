@@ -146,6 +146,9 @@ namespace Core
             var averageAccuracy = 0.0;
 
             sw.Restart();
+
+            // ----- Training -----
+
             // Create model 
             var model = new Cdp(NUM_TREES
                                 , COMPRESSION_FACTOR
@@ -163,13 +166,19 @@ namespace Core
 
             // Fit model 
             model.Fit(trainClassLabels, trainTimeSeriesMatrix);
+
             sw.Stop();
             averageTrainingTime += sw.ElapsedMilliseconds;
+
+            // ----- Testing -----
 
             // Obtain test dataset
             var testClassLabels = new List<int>();
             var testTimeSeriesMatrix = new List<List<double>>();
-            generateTimeSeriesMatrixFromFile(TEST_FILE_PATH, DELIMITER, testClassLabels, testTimeSeriesMatrix);
+            generateTimeSeriesMatrixFromFile(TEST_FILE_PATH
+                                             , DELIMITER
+                                             , testClassLabels
+                                             , testTimeSeriesMatrix);
 
             // Predict
             var resultClassLabels = model.Predict(testTimeSeriesMatrix, true);
@@ -186,7 +195,7 @@ namespace Core
             }
             averageAccuracy += (countSame / (float)countAll); 
             
-            // Present results 
+            // Show results 
             Console.Write("\r                   ");
             Console.WriteLine();
             Console.WriteLine("Average training time: {0} seconds", averageTrainingTime/1000.0);

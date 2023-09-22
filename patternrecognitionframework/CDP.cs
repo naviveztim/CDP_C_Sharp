@@ -1,22 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-// using Framework;
 using Utilities;
 
 namespace Core
 {
     public class Cdp
     {
-        //private ManagingAgent headManagingAgent; 
-        private List<ShapeletClassifier> Agents = new List<ShapeletClassifier>();
-        public bool ClassifiyWithPath { get; set; }
-
+        private bool _classifiyWithPath { get; set; }
+        private List<ShapeletClassifier> _classifiers = new List<ShapeletClassifier>();
         private readonly List<Tuple<int, string>> _decisionPatterens = new List<Tuple<int, string>>(); // TEST 
 
-
-        public string TrainFileName { get; private set;  }
-        public string TestFileName { get; private set;  }
         public int CompressonFactor {get; private set ; }
         public int NumClassLabelsPerTree { get; private set; }
         public string Delimiter { get; private set; }
@@ -30,8 +24,6 @@ namespace Core
                    , bool normalize
                    , int numClassLabelsPerTree)
         {
-            TrainFileName = "";
-            TestFileName = "";
             CompressonFactor = compressionFactor;
             NumClassLabelsPerTree = numClassLabelsPerTree;
             // TODO: Remove such definition 
@@ -42,7 +34,27 @@ namespace Core
             Normalize = normalize;
         }
 
-        private void createAndTrainClassifiers(List<int> classIndexes, DataSet dataSet)
+        private static ShapeletClassifier CreateAndTrainClassifier(IList<int> classesInDataSet
+                                                                   , DataSet dataSet)
+        {
+            var classifier = new ShapeletClassifier(dataSet.MinLength
+                                                    , dataSet.MaxLength
+                                                    , classesInDataSet
+                                                    , dataSet);
+
+            if (!classifier.LoadClassifier())
+            {
+                var newDataSet = dataSet.Clone(classesInDataSet).CloneRandom(10);
+                if (!classifier.Train(newDataSet))
+                {
+                    return null;
+                }
+            }
+
+            return classifier;
+        }
+
+        private void _createAndTrainClassifiers(List<int> classIndexes, DataSet dataSet)
         {
             // Create group of decision trees 
             var group = Utils.createSpecifiedGroup(classIndexes, PatternLength, NumClassLabelsPerTree);
@@ -53,14 +65,10 @@ namespace Core
             var numDecisionTrees = group.Count();  
             foreach (var combination in group)
             {
-                var classifier = ShapeletsDataMiningUtils.CreateAndTrainClassifier(combination
-                                                                                   , dataSet);
+                var classifier = CreateAndTrainClassifier(combination, dataSet);
                 if (classifier != null)
                 {
-                    //var agent = new ClassificationAgent(classifier);
-
-                    // headManagingAgent.Add(classifier/*agent*/);
-                    Agents.Add(classifier); 
+                    _classifiers.Add(classifier); 
                 }
                 p++; 
                 Console.Write("\rPercent trained decision trees: {0:F1}%", (p * 100.0) / numDecisionTrees);
@@ -93,9 +101,8 @@ namespace Core
 
             return mostPopularIndexes;
         }
-
-        
-        private List<int> getMostPopularIndexesSimilarityCoefficient(string result)
+     
+        private List<int> _getMostPopularIndexesSimilarityCoefficient(string result)
         {
             var trainResults = new List<Tuple<int, string>>();
             var similarityDistances = new List<Tuple<int, double>>();
@@ -131,25 +138,23 @@ namespace Core
             return mostPopularIndexes;
         }
 
-        public int Classify(TimeSeries timeSeries)
+        private int _classify(TimeSeries timeSeries, bool classifiyWithPath = false)
         {
             List<int> mostPopularIndexes;
 
-            if (ClassifiyWithPath)
+            if (classifiyWithPath)
             {
-                var stringResults = Agents.Select(agent => agent.ClassifyWithPath(timeSeries)).ToList();
+                var stringResults = _classifiers.Select(classifier => classifier.ClassifyWithPath(timeSeries)).ToList();
 
                 var totalResult = stringResults.Aggregate("", (current, result) => current + result);
 
-                //appendFeaturesToFile(timeSeries.ClassIndex, totalResult); // TEST
-
-                var mostPopularStringIndexes = getMostPopularIndexesSimilarityCoefficient(totalResult);
+                var mostPopularStringIndexes = _getMostPopularIndexesSimilarityCoefficient(totalResult);
 
                 mostPopularIndexes = mostPopularStringIndexes;
             }
             else
             {
-                var results = Agents.Select(agent => agent.Classify(timeSeries)).ToList();
+                var results = _classifiers.Select(agent => agent.Classify(timeSeries)).ToList();
 
                 mostPopularIndexes = _getMostPopularIndexes(results);
             }
@@ -161,16 +166,16 @@ namespace Core
                 return mostPopularIndexes[0];
             }
 
-            return int.MinValue;  //-1; // TEST 
+            return int.MinValue;  
         }
 
-        public void PrepareTrainingPatterns(DataSet TrainDataSet)
+        private void _prepareTrainingPatterns(DataSet TrainDataSet)
         {
             foreach (var i in TrainDataSet.ClassIndexes)
             {
                 for (var j = 0; j < TrainDataSet.TimeSeriesIndexes[i].Count(); j++)
                 {
-                    var decisionPatten = Agents.Aggregate("", (current, agent) => current + agent.GetClassificationPath(i, j));
+                    var decisionPatten = _classifiers.Aggregate("", (current, agent) => current + agent.GetClassificationPath(i, j));
                     _decisionPatterens.Add(new Tuple<int, string>(i, decisionPatten));
                 }
             }
@@ -188,25 +193,16 @@ namespace Core
                                            , UseSignal
                                            , Normalize);
 
-            //headManagingAgent = new ManagingAgent(/*trainDataSet
-            //                                      , DataMiningMethod.PsoShapelets*/)
-            //{
-            //    ClassifiyWithPath = false
-            //};
+            // Create decision trees and add them into a list 
+            _createAndTrainClassifiers(classIndexes, trainDataSet);
 
-            createAndTrainClassifiers(classIndexes, trainDataSet);
-
-            // Create and collect decission paths 
+            // Create and collect decission pattern 
             foreach (var timeSeries in trainDataSet.TimeSeries)
             {
-                //headManagingAgent.Classify(timeSeries);
-                Classify(timeSeries);
+                _classify(timeSeries);
             }
-
             TypicalPath.DistancesCollected = true;
-
-            //headManagingAgent.PrepareTrainingPatterns(trainDataSet);
-            PrepareTrainingPatterns(trainDataSet);
+            _prepareTrainingPatterns(trainDataSet);
 
         }
 
@@ -222,16 +218,14 @@ namespace Core
 
             var testDataSet = new DataSet(indexes, seriesMatrix, CompressonFactor, UseSignal, Normalize);
 
-            // headManagingAgent.ClassifiyWithPath = true;
-            ClassifiyWithPath = true;
+            //_classifiyWithPath = true;
 
             var timeSeriesArray = testDataSet.TimeSeries.ToArray();
             var count = timeSeriesArray.Length;
 
             for (var i = 0; i < count; i++)
             {
-                //var resultIndex = headManagingAgent.Classify(timeSeriesArray[i]);
-                var resultIndex = Classify(timeSeriesArray[i]);
+                var resultIndex = _classify(timeSeriesArray[i], true);
                 classifiedLabels.Add(resultIndex);
             }
 

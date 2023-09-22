@@ -5,33 +5,15 @@ using Utilities;
 
 namespace Core
 {
-    //TODO: Delete this - it is only for TEST purposes 
-    /*class CircularListIterator
-    {
-        private List<float> floatList = new List<float> { 0.25f, 0.71f, 0.22f, 0.12f, 0.43f, 0.03f};
-        private int currentIndex = -1;
-
-        public float NextDouble()
-        {
-            if (floatList.Count == 0)
-            {
-                throw new System.Exception("List is empty");
-            }
-
-            currentIndex = (currentIndex + 1) % floatList.Count;
-            return floatList[currentIndex];
-        }
-    }
-    */
-
     public class CandidateShapelet 
     {
         public double OptimalSplitDistance { get; set; }
-        public int ParticleLength { get; set; }  // It does not coinside with Position.Length
+        public double BestInformationGain { get; set; }
         public double[] Position { get; set; }
+        public int ParticleLength { get; set; }      
         public double[] Velocity { get; set; }
         public double[] BestPosition { get; set; }
-        public double BestInformationGain { get; set; }
+       
 
         public CandidateShapelet(int particleLength)
         {
@@ -40,42 +22,38 @@ namespace Core
         private void InitParticle(int particleLength)
         {
             OptimalSplitDistance = -1.0;
-            ParticleLength = particleLength;
             Position = new double[particleLength];
+            BestInformationGain = double.MinValue;
+            ParticleLength = particleLength;
             Velocity = new double[particleLength];
             BestPosition = new double[particleLength];
-            BestInformationGain = double.MinValue;
         }
 
         public void Copy(CandidateShapelet particle)
         {
             OptimalSplitDistance = particle.OptimalSplitDistance;
+            BestInformationGain = particle.BestInformationGain;
             ParticleLength = particle.ParticleLength;
             particle.Position.CopyTo(Position, 0);
             particle.Velocity.CopyTo(Velocity, 0);
             BestPosition = particle.BestPosition;
-            BestInformationGain = particle.BestInformationGain;
+            
         }
     }
 
     public class  BasicPSO
     {
-        // Swarm definition 
         public CandidateShapelet BestParticle;
         private readonly List<CandidateShapelet> _swarm = new List<CandidateShapelet>();
         private readonly Random _ran = new Random(); 
-        // private readonly CircularListIterator _ran = new CircularListIterator(); // TEST ONLY!!! 
         private int _maxParticleLength;
         private int _minParticleLength;
-        private int _step; 
-        // PSO constants: http://msdn.microsoft.com/en-us/magazine/hh335067.aspx
+        private int _step;
         private const double W = 0.729; // inertia weight
         private const double C1 = 1.49445; // cognitive/local weight 
         private const double C2 = 1.49445; // social/global weight
         private double R1, R2; // cognitive and social randomizations
-        // PSO variables
-        // private int _maxIterations = 6;
-        public const double ITERATION_EPSILON = 0.0000001;
+        private const double ITERATION_EPSILON = 0.0000001;
         private readonly double _minPositionValue = 3.0;
         private readonly double _maxPositionValue = -3.0;
         private readonly double _minVelocity = 3.0;
@@ -102,7 +80,7 @@ namespace Core
             BestParticle = new CandidateShapelet(maxLength);
         }
 
-        private static void updateParticlesGain(CandidateShapelet candidateShapelet
+        private static void _updateParticlesGain(CandidateShapelet candidateShapelet
                                                 , double informationGain
                                                 , double splitPoint)
         {
@@ -111,7 +89,7 @@ namespace Core
             candidateShapelet.BestInformationGain = informationGain;
         }
 
-        private void psoShapeletFitness(CandidateShapelet particle)
+        private void _psoShapeletFitness(CandidateShapelet particle)
         {
             var distances = new List<HistogramItem>();
 
@@ -135,7 +113,7 @@ namespace Core
 
             if (particle.BestInformationGain < informationGain)
             {
-                updateParticlesGain(particle, informationGain, splitPoint);
+                _updateParticlesGain(particle, informationGain, splitPoint);
             }
         }
 
@@ -157,7 +135,7 @@ namespace Core
                     particle.Position[j] = (_maxPositionValue - _minPositionValue) * _ran.NextDouble() + _minPositionValue;
                 }
 
-                psoShapeletFitness(particle);
+                _psoShapeletFitness(particle);
                 
                 _swarm.Add(particle);
 
@@ -201,7 +179,7 @@ namespace Core
                     }
 
                     // Calculate particle information gain 
-                    psoShapeletFitness(particle);
+                    _psoShapeletFitness(particle);
 
                     // Update best particle 
                     if (particle.BestInformationGain > BestParticle.BestInformationGain)
@@ -213,7 +191,7 @@ namespace Core
 
                 oldBestGain = newBestGain;
                 newBestGain = BestParticle.BestInformationGain;  
-                Console.WriteLine("Iteration: {0}", iteration);
+                // Console.WriteLine("Iteration: {0}", iteration);
                 
             } while ( Math.Abs(oldBestGain - newBestGain) > ITERATION_EPSILON); 
     
