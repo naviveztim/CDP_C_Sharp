@@ -12,25 +12,17 @@ namespace Core
 {
     public class ShapeletClassifier 
     {
-        private TypicalPath _typicalPath = new TypicalPath();
-        private BTree<Shapelet> _bestClassificationTree;
-        private TimeSeries[] _trainTimeSeries;
+        private BTree<Shapelet> _mostAccurateTree;
+        private readonly string _decisionTreeFilepath;
         private static List<string> _classifiersPathsList = null;
         private static Dictionary<string, int> _lastUsedNumberDict = null;
-        private readonly int _minLength;
-        private readonly int _maxLength;
-        private readonly string _classificationTreePath;
 
         const string CLASSIFIERS_FOLDER = ".\\_classifiers\\";
 
-        public ShapeletClassifier(int minLength
-                                  , int maxLength
-                                  , IList<int> classesInDataSet
+        public ShapeletClassifier(IList<int> classesInDataSet
                                   , DataSet dataSet)
         {
-            _minLength = minLength;
-            _maxLength = maxLength;
-            _classificationTreePath = _getClassifierFileName(classesInDataSet, dataSet.DirectoryName);
+            _decisionTreeFilepath = _getClassifierFileName(classesInDataSet, dataSet.DirectoryName);
         }
 
         private static void _fillsClassifiersPathsList()
@@ -153,7 +145,7 @@ namespace Core
             var result = 0.0;
             foreach (var classIndex in dataSet.ClassIndexes)
             {
-                result += _testClassify(classIndex, tree, dataSet.TimeSeriesIndexes[classIndex]);
+                result += _testTreeOnGivenIndex(classIndex, tree, dataSet.TimeSeriesIndexes[classIndex]);
             }
 
             result /= dataSet.NumClasses;
@@ -161,73 +153,73 @@ namespace Core
             return result;
         }
 
-        private static double _testClassify(int classIndex
-                                            , BTree<Shapelet> classificationTree
-                                            , IEnumerable<TimeSeries> testDataSet)
-                                        {
-                                            if (testDataSet == null)
-                                            {
-                                                throw new Exception("No data set is given!");
-                                            }
+        private static double _testTreeOnGivenIndex(int classIndex
+                                                    , BTree<Shapelet> classificationTree
+                                                    , IEnumerable<TimeSeries> testDataSet)
+        {
+            if (testDataSet == null)
+            {
+                throw new Exception("No data set is given!");
+            }
 
-                                            var correctclyClassified = 0;
+            var correctclyClassified = 0;
 
-                                            var dataSet = testDataSet as TimeSeries[] ?? testDataSet.ToArray();
-                                            foreach (var timeSeries in dataSet)
-                                            {
-                                                // Classify the time series 
-                                                var currentNode = classificationTree.Root;
-                                                while (true)
-                                                {
-                                                    if (currentNode.Data == null)
-                                                    {
-                                                        break;
-                                                    }
+            var dataSet = testDataSet as TimeSeries[] ?? testDataSet.ToArray();
+            foreach (var timeSeries in dataSet)
+            {
+                // Classify the time series 
+                var currentNode = classificationTree.Root;
+                while (true)
+                {
+                    if (currentNode.Data == null)
+                    {
+                        break;
+                    }
 
-                                                    var shapeletNode = currentNode.Data;
-                                                    if (shapeletNode != null)
-                                                    {
-                                                        var distance = Utils.SubsequenceDist(timeSeries, shapeletNode.ShapeletsValues);
+                    var shapeletNode = currentNode.Data;
+                    if (shapeletNode != null)
+                    {
+                        var distance = Utils.SubsequenceDist(timeSeries, shapeletNode.ShapeletsValues);
 
-                                                        // Left wing 
-                                                        if (distance <= shapeletNode.OptimalSplitDistance)
-                                                        {
-                                                            if (currentNode.Left != null)
-                                                            {
-                                                                currentNode = currentNode.Left;
-                                                                continue;
-                                                            }
+                        // Left wing 
+                        if (distance <= shapeletNode.OptimalSplitDistance)
+                        {
+                            if (currentNode.Left != null)
+                            {
+                                currentNode = currentNode.Left;
+                                continue;
+                            }
 
-                                                            if (currentNode.Data.LeftClassIndex == classIndex)
-                                                            {
-                                                                correctclyClassified++;
-                                                            }
+                            if (currentNode.Data.LeftClassIndex == classIndex)
+                            {
+                                correctclyClassified++;
+                            }
 
-                                                            break;
-                                                        }
+                            break;
+                        }
 
-                                                        // Right wing
-                                                        if (distance > shapeletNode.OptimalSplitDistance)
-                                                        {
-                                                            if (currentNode.Right != null)
-                                                            {
-                                                                currentNode = currentNode.Right;
-                                                                continue;
-                                                            }
+                        // Right wing
+                        if (distance > shapeletNode.OptimalSplitDistance)
+                        {
+                            if (currentNode.Right != null)
+                            {
+                                currentNode = currentNode.Right;
+                                continue;
+                            }
 
-                                                            if (currentNode.Data.RightClassIndex == classIndex)
-                                                            {
-                                                                correctclyClassified++;
-                                                            }
+                            if (currentNode.Data.RightClassIndex == classIndex)
+                            {
+                                correctclyClassified++;
+                            }
 
-                                                            break;
-                                                        }
-                                                    }
-                                                }
-                                            }
+                            break;
+                        }
+                    }
+                }
+            }
 
-                                            return ((double)correctclyClassified / dataSet.Count());
-                                        }
+            return ((double)correctclyClassified / dataSet.Count());
+        }
 
         private static void _padAnswer(StringBuilder answer)
         {
@@ -238,9 +230,8 @@ namespace Core
             answer.Append(padString);
         }
 
-        private static int _classify(BTree<Shapelet> classificationTree
+        private static void _buildClassificationPath(BTree<Shapelet> classificationTree
                                    , TimeSeries timeSeries
-                                   , List<double> distances
                                    , StringBuilder pathString)
         {
             if (timeSeries == null)
@@ -253,7 +244,6 @@ namespace Core
                 throw new InvalidEnumArgumentException("Classification tree does not exists!");
             }
 
-            // Classify the time series 
             var currentNode = classificationTree.Root;
             while (true)
             {
@@ -266,11 +256,7 @@ namespace Core
                 if (shapeletNode != null)
                 {
                     var distance = Utils.SubsequenceDist(timeSeries, shapeletNode.ShapeletsValues);
-                    if (distances != null)
-                    {
-                        distances.Add(distance);
-                    }
-
+                    
                     // Left wing 
                     if (distance <= shapeletNode.OptimalSplitDistance)
                     {
@@ -281,14 +267,14 @@ namespace Core
                             continue;
                         }
 
-                        if (currentNode.Data.LeftClassIndex != int.MinValue)//-1) // TEST 
+                        if (currentNode.Data.LeftClassIndex != int.MinValue) 
                         {
                             pathString.Append("L");
                             _padAnswer(pathString);
-                            return currentNode.Data.LeftClassIndex;
+                            return; 
                         }
 
-                        return int.MinValue;   
+                        return;    
                     }
 
                     // Right wing
@@ -305,29 +291,29 @@ namespace Core
                         {
                             pathString.Append("R");
                             _padAnswer(pathString);
-                            return currentNode.Data.RightClassIndex;
+                            return; 
                         }
 
-                        return int.MinValue;  
+                        return;   
                     }
                 }
             }
 
-            return int.MinValue;  
+            return;  
         }
 
         private Shapelet _findShapelet(int classIndexA, int classIndexB, DataSet dataSet)
         {
             // Extract train time series 
-            _trainTimeSeries = dataSet.ExtractFromDataSet(classIndexA, classIndexB).ToArray();
+            var trainTimeSeries = dataSet.ExtractFromDataSet(classIndexA, classIndexB).ToArray();
 
             // Find optimal shapelet that distinguish between the two class indexes 
             var pso = new BasicPSO(dataSet.MinLength
                                  , dataSet.MaxLength
                                  , dataSet.Step
-                                 , _trainTimeSeries[0].Values.Min()
-                                 , _trainTimeSeries[0].Values.Max()
-                                 , _trainTimeSeries);
+                                 , trainTimeSeries[0].Values.Min()
+                                 , trainTimeSeries[0].Values.Max()
+                                 , trainTimeSeries);
             pso.InitPSO();
             pso.StartPSO();
 
@@ -340,9 +326,9 @@ namespace Core
             };
 
             //Set left and right class index of the shapelet 
-            var dataSetClassA = _trainTimeSeries.Where(t => t.ClassIndex == classIndexA).ToArray();
+            var dataSetClassA = trainTimeSeries.Where(t => t.ClassIndex == classIndexA).ToArray();
             _splitClasses(shapelet, classIndexA, dataSetClassA);
-            var dataSetClassB = _trainTimeSeries.Where(t => t.ClassIndex == classIndexB).ToArray();
+            var dataSetClassB = trainTimeSeries.Where(t => t.ClassIndex == classIndexB).ToArray();
             _splitClasses(shapelet, classIndexB, dataSetClassB);
 
             return shapelet;
@@ -351,24 +337,24 @@ namespace Core
         private static void _splitClasses(Shapelet shapelet
                                           , int classIndex
                                           , TimeSeries[] dataSetTimeSeries)
-                                        {
-                                            var classifiedLessThatDistance = dataSetTimeSeries.Select(timeSeries =>
-                                                        Utils.SubsequenceDist(timeSeries, shapelet.ShapeletsValues)).
-                                                        Count(distance => distance < shapelet.OptimalSplitDistance);
+        {
+            var classifiedLessThatDistance = dataSetTimeSeries.Select(timeSeries =>
+                        Utils.SubsequenceDist(timeSeries, shapelet.ShapeletsValues)).
+                        Count(distance => distance < shapelet.OptimalSplitDistance);
 
-                                            var classifiedMoreThanDistance = dataSetTimeSeries.Count() - classifiedLessThatDistance;
+            var classifiedMoreThanDistance = dataSetTimeSeries.Count() - classifiedLessThatDistance;
 
-                                            if (classifiedLessThatDistance > classifiedMoreThanDistance)
-                                            {
-                                                shapelet.LeftClassIndex = classIndex;
-                                            }
-                                            else
-                                            {
-                                                shapelet.RightClassIndex = classIndex;
-                                            }
-                                        }
+            if (classifiedLessThatDistance > classifiedMoreThanDistance)
+            {
+                shapelet.LeftClassIndex = classIndex;
+            }
+            else
+            {
+                shapelet.RightClassIndex = classIndex;
+            }
+        }
 
-        private static BTree<Shapelet> _findBestClassificationTree(List<Shapelet> shapeletsList
+        private static BTree<Shapelet> _findMostAccurateTree(List<Shapelet> shapeletsList
                                                                  , DataSet dataSet)
         {
             var bestResult = 0.0;
@@ -405,9 +391,9 @@ namespace Core
 
         public bool LoadClassifier()
         {
-            _bestClassificationTree = Utils.Deserialize<BTree<Shapelet>>(_classificationTreePath);
+            _mostAccurateTree = Utils.Deserialize<BTree<Shapelet>>(_decisionTreeFilepath);
 
-            if (_bestClassificationTree != null)
+            if (_mostAccurateTree != null)
             {
                 return true;
             }
@@ -439,14 +425,14 @@ namespace Core
 
             if (shapeletsList.Count > 0)
             {
-                _bestClassificationTree = _findBestClassificationTree(shapeletsList, dataSet);
+                _mostAccurateTree = _findMostAccurateTree(shapeletsList, dataSet);
 
-                if (_bestClassificationTree == null)
+                if (_mostAccurateTree == null)
                 {
                     return false; 
                 }
 
-                Utils.Serialize(_bestClassificationTree, _classificationTreePath); // TEST
+                Utils.Serialize(_mostAccurateTree, _decisionTreeFilepath); 
 
                 return true; 
             }
@@ -454,55 +440,20 @@ namespace Core
             return false; 
         }
 
-        public int Classify(TimeSeries timeSeries)
+        public string GetDecisionPath(TimeSeries timeSeries)
         {
-            if (_bestClassificationTree == null)
-            {
-                return int.MinValue;
-            }
-
-            var distances = new List<double>(); 
-            var pathString = new StringBuilder();
-            var foundIndex = _classify(_bestClassificationTree
-                                      , timeSeries
-                                      , distances
-                                      , pathString);
-
-            if (!TypicalPath.DistancesCollected)
-            {
-                if (!_typicalPath.TypicalDistances.ContainsKey(timeSeries.ClassIndex))
-                {
-                    _typicalPath.TypicalDistances.Add(timeSeries.ClassIndex, new List<double>());
-                }
-                if (!_typicalPath.PathString.ContainsKey(timeSeries.ClassIndex))
-                {
-                    _typicalPath.PathString.Add(timeSeries.ClassIndex, new List<string>());
-                }
-                var path = distances.Sum(); 
-                _typicalPath.TypicalDistances[timeSeries.ClassIndex].Add(path);
-                _typicalPath.PathString[timeSeries.ClassIndex].Add(pathString.ToString());
-            }
-
-            return foundIndex;
-        }
-
-        public string ClassifyWithPath(TimeSeries timeSeries)
-        {
-            if (_bestClassificationTree == null)
+            if (_mostAccurateTree == null)
             {
                 return "";
             }
+            
+            var pathString = new StringBuilder();
+            _buildClassificationPath(_mostAccurateTree
+                                      , timeSeries
+                                      , pathString);
 
-            var distances = new List<double>();
-            var classificationPath = new StringBuilder();
-            _classify(_bestClassificationTree, timeSeries, distances, classificationPath);
-
-            return classificationPath.ToString(); 
+            return pathString.ToString();
         }
 
-        public string GetClassificationPath(int classIndex, int trial)
-        {
-            return _typicalPath.PathString[classIndex][trial]; 
-        }
     }
 }

@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
+using System.ComponentModel;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 
@@ -38,8 +40,17 @@ namespace Utilities
 
     public class Utils
     {
-        public static int MAX_ANSWER_LENGTH = 1; 
-        
+        public static int MAX_ANSWER_LENGTH = 1;
+
+        private static void _padAnswer(StringBuilder answer)
+        {
+            var padLength = Utils.MAX_ANSWER_LENGTH - answer.Length;
+
+            var padString = new StringBuilder().Insert(0, "0", padLength);
+
+            answer.Append(padString);
+        }
+
         public static double EuclidianDistance(double[] array1, double[] array2, double currentMinDistance)
         {
             if ((array1 == null) || (array2 == null))

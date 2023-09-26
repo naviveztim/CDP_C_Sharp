@@ -7,16 +7,15 @@ namespace Core
 {
     public class Cdp
     {
-        private bool _classifiyWithPath { get; set; }
-        private List<ShapeletClassifier> _classifiers = new List<ShapeletClassifier>();
-        private readonly List<Tuple<int, string>> _decisionPatterens = new List<Tuple<int, string>>(); // TEST 
-
         public int CompressonFactor {get; private set ; }
         public int NumClassLabelsPerTree { get; private set; }
         public string Delimiter { get; private set; }
         public int PatternLength { get; private set; }
         public bool UseSignal { get; private set;  }
         public bool Normalize { get; private set;  }
+
+        private List<ShapeletClassifier> _classifiers = new List<ShapeletClassifier>();
+        private readonly List<Tuple<int, string>> _decisionPatterens = new List<Tuple<int, string>>(); 
 
         public Cdp(int patternLength
                    , int compressionFactor
@@ -34,12 +33,10 @@ namespace Core
             Normalize = normalize;
         }
 
-        private static ShapeletClassifier CreateAndTrainClassifier(IList<int> classesInDataSet
+        private static ShapeletClassifier _createAndTrainClassifier(IList<int> classesInDataSet
                                                                    , DataSet dataSet)
         {
-            var classifier = new ShapeletClassifier(dataSet.MinLength
-                                                    , dataSet.MaxLength
-                                                    , classesInDataSet
+            var classifier = new ShapeletClassifier(classesInDataSet
                                                     , dataSet);
 
             if (!classifier.LoadClassifier())
@@ -53,19 +50,19 @@ namespace Core
 
             return classifier;
         }
-
+  
         private void _createAndTrainClassifiers(List<int> classIndexes, DataSet dataSet)
         {
-            // Create group of decision trees 
+            // Create groups of indexes  
             var group = Utils.createSpecifiedGroup(classIndexes, PatternLength, NumClassLabelsPerTree);
             Utils.printGroup(group, "");
 
-            // Fit decision trees 
+            // Create decision trees 
             var p = 0;
             var numDecisionTrees = group.Count();  
             foreach (var combination in group)
             {
-                var classifier = CreateAndTrainClassifier(combination, dataSet);
+                var classifier = _createAndTrainClassifier(combination, dataSet);
                 if (classifier != null)
                 {
                     _classifiers.Add(classifier); 
@@ -138,28 +135,19 @@ namespace Core
             return mostPopularIndexes;
         }
 
-        private int _classify(TimeSeries timeSeries, bool classifiyWithPath = false)
+        private int _classify(TimeSeries timeSeries)
         {
             List<int> mostPopularIndexes;
 
-            if (classifiyWithPath)
-            {
-                var stringResults = _classifiers.Select(classifier => classifier.ClassifyWithPath(timeSeries)).ToList();
+            var stringResults = _classifiers.Select(classifier => classifier.GetDecisionPath(timeSeries)).ToList();
 
-                var totalResult = stringResults.Aggregate("", (current, result) => current + result);
+            var totalResult = stringResults.Aggregate("", (current, result) => current + result);
 
-                var mostPopularStringIndexes = _getMostPopularIndexesSimilarityCoefficient(totalResult);
+            var mostPopularStringIndexes = _getMostPopularIndexesSimilarityCoefficient(totalResult);
 
-                mostPopularIndexes = mostPopularStringIndexes;
-            }
-            else
-            {
-                var results = _classifiers.Select(agent => agent.Classify(timeSeries)).ToList();
-
-                mostPopularIndexes = _getMostPopularIndexes(results);
-            }
-
-            mostPopularIndexes.RemoveAll(i => i == int.MinValue/*-1*/); // TEST 
+            mostPopularIndexes = mostPopularStringIndexes;
+            
+            mostPopularIndexes.RemoveAll(i => i == int.MinValue); 
 
             if (mostPopularIndexes.Count == 1)
             {
@@ -169,16 +157,14 @@ namespace Core
             return int.MinValue;  
         }
 
-        private void _prepareTrainingPatterns(DataSet TrainDataSet)
+        private void _prepareTrainingPatterns(DataSet trainDataSet)
         {
-            foreach (var i in TrainDataSet.ClassIndexes)
+            foreach (var timeSeries in trainDataSet.TimeSeries)
             {
-                for (var j = 0; j < TrainDataSet.TimeSeriesIndexes[i].Count(); j++)
-                {
-                    var decisionPatten = _classifiers.Aggregate("", (current, agent) => current + agent.GetClassificationPath(i, j));
-                    _decisionPatterens.Add(new Tuple<int, string>(i, decisionPatten));
-                }
+                var decisionPattern = _classifiers.Aggregate("", (current, classifier) => current + classifier.GetDecisionPath(timeSeries));
+                _decisionPatterens.Add(new Tuple<int, string>(timeSeries.ClassIndex, decisionPattern));
             }
+
         }
 
         public void Fit(IList<int> classLabels, IEnumerable<IEnumerable<double>> timeSeriesMatrix)
@@ -196,36 +182,33 @@ namespace Core
             // Create decision trees and add them into a list 
             _createAndTrainClassifiers(classIndexes, trainDataSet);
 
-            // Create and collect decission pattern 
-            foreach (var timeSeries in trainDataSet.TimeSeries)
-            {
-                _classify(timeSeries);
-            }
-            TypicalPath.DistancesCollected = true;
+            // Collect and aggregate decission paths for every decision tree 
+            // [(1, 'LLRLLR0LLLL')
+            //  (1, 'LLRLL0RLLLL')
+            //  (2, 'LLLLRRRR0LL')
+            //  (2, 'LLLLLRRRRLL')]
             _prepareTrainingPatterns(trainDataSet);
 
         }
 
-        public List<int> Predict(IEnumerable<IEnumerable<double>> timeSeriesMatrix, bool printDecisionPatterns = false)
+        public List<int> Predict(IEnumerable<IEnumerable<double>> timeSeriesMatrix)
         {
             Console.Write("Classifying...");
             var classifiedLabels = new List<int>();
 
-            // We do that to keep compression, S/D and normalization over the test signal as well 
+            // Do compression, S/D and normalization over the test signal as well, if acquired 
             var indexes = new List<int>();
             var seriesMatrix = timeSeriesMatrix as IEnumerable<double>[] ?? timeSeriesMatrix.ToArray();
             indexes.AddRange(Enumerable.Range(1, seriesMatrix.Count())); // False class indexes
 
             var testDataSet = new DataSet(indexes, seriesMatrix, CompressonFactor, UseSignal, Normalize);
 
-            //_classifiyWithPath = true;
-
             var timeSeriesArray = testDataSet.TimeSeries.ToArray();
             var count = timeSeriesArray.Length;
 
             for (var i = 0; i < count; i++)
             {
-                var resultIndex = _classify(timeSeriesArray[i], true);
+                var resultIndex = _classify(timeSeriesArray[i]);
                 classifiedLabels.Add(resultIndex);
             }
 

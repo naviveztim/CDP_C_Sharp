@@ -181,7 +181,7 @@ namespace Core
                                              , testTimeSeriesMatrix);
 
             // Predict
-            var resultClassLabels = model.Predict(testTimeSeriesMatrix, true);
+            var resultClassLabels = model.Predict(testTimeSeriesMatrix);
 
             // Evaluate results 
             var countSame = 0;
