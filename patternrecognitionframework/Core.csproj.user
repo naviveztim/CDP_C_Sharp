@@ -1,9 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <StartArguments>CDPMethod --train "D:\Research\Datasets\UCR Time series\UCR_TS_Archive_2015\Beef\Beef_TRAIN" --test "D:\Research\Datasets\UCR Time series\UCR_TS_Archive_2015\Beef\Beef_TEST" --compress 1 --signal  D --norm Y --tree_size 2 --pattern_length 400</StartArguments>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
-    <StartArguments>CDPMethod --train "D:\Research\Datasets\UCR Time series\UCR_TS_Archive_2015\Beef\Beef_TRAIN" --test "D:\Research\Datasets\UCR Time series\UCR_TS_Archive_2015\Beef\Beef_TEST" --compress 1 --signal  D --norm Y --tree_size 2 --pattern_length 400</StartArguments>
-  </PropertyGroup>
-</Project>
