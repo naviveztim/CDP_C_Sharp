@@ -1,6 +1,4 @@
-﻿#define EARLY_ABANDON
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -12,17 +10,20 @@ namespace Core
 {
     public class ShapeletClassifier 
     {
-        private BTree<Shapelet> _mostAccurateTree;
+        private DecisionTree<Shapelet> _mostAccurateTree;
         private readonly string _decisionTreeFilepath;
+        private readonly int _maxPathLength; 
         private static List<string> _classifiersPathsList = null;
         private static Dictionary<string, int> _lastUsedNumberDict = null;
 
         const string CLASSIFIERS_FOLDER = ".\\_classifiers\\";
 
         public ShapeletClassifier(IList<int> classesInDataSet
-                                  , DataSet dataSet)
+                                  , DataSet dataSet
+                                  , int maxPathLength)
         {
             _decisionTreeFilepath = _getClassifierFileName(classesInDataSet, dataSet.DirectoryName);
+            _maxPathLength = maxPathLength; 
         }
 
         private static void _fillsClassifiersPathsList()
@@ -88,7 +89,7 @@ namespace Core
             return classifierPath;
         }
 
-        private static bool _buildTree(BTree<Shapelet> tree
+        private static bool _buildTree(DecisionTree<Shapelet> tree
                                        , IEnumerable<Shapelet> permutation
                                        , int numClasses)
         {
@@ -140,7 +141,7 @@ namespace Core
             return true;
         }
 
-        private static double _testTreeAccuracy(BTree<Shapelet> tree, DataSet dataSet)
+        private static double _testTreeAccuracy(DecisionTree<Shapelet> tree, DataSet dataSet)
         {
             var result = 0.0;
             foreach (var classIndex in dataSet.ClassIndexes)
@@ -154,7 +155,7 @@ namespace Core
         }
 
         private static double _testTreeOnGivenIndex(int classIndex
-                                                    , BTree<Shapelet> classificationTree
+                                                    , DecisionTree<Shapelet> classificationTree
                                                     , IEnumerable<TimeSeries> testDataSet)
         {
             if (testDataSet == null)
@@ -221,16 +222,16 @@ namespace Core
             return ((double)correctclyClassified / dataSet.Count());
         }
 
-        private static void _padAnswer(StringBuilder answer)
+        private void _padAnswer(StringBuilder answer)
         {
-            var padLength = Utils.MAX_ANSWER_LENGTH - answer.Length;
+            var padLength = _maxPathLength - answer.Length;
 
             var padString = new StringBuilder().Insert(0, "0", padLength);
 
             answer.Append(padString);
         }
 
-        private static void _buildClassificationPath(BTree<Shapelet> classificationTree
+        private void _buildClassificationPath(DecisionTree<Shapelet> classificationTree
                                    , TimeSeries timeSeries
                                    , StringBuilder pathString)
         {
@@ -354,11 +355,11 @@ namespace Core
             }
         }
 
-        private static BTree<Shapelet> _findMostAccurateTree(List<Shapelet> shapeletsList
+        private static DecisionTree<Shapelet> _findMostAccurateTree(List<Shapelet> shapeletsList
                                                                  , DataSet dataSet)
         {
             var bestResult = 0.0;
-            BTree<Shapelet> bestTree = null;
+            DecisionTree<Shapelet> bestTree = null;
 
             // Load test time series for every class
             var combinations = Utils.GetCombinations(shapeletsList, 0, dataSet.NumClasses - 1);
@@ -369,7 +370,7 @@ namespace Core
                 foreach (var permutation in permutations)
                 {
                     // Create classification tree
-                    var tree = new BTree<Shapelet> { Root = new BTree<Shapelet>.Node(permutation.First()) };
+                    var tree = new DecisionTree<Shapelet> { Root = new DecisionTree<Shapelet>.Node(permutation.First()) };
 
                     if (!_buildTree(tree, permutation, dataSet.NumClasses))
                     {
@@ -391,7 +392,7 @@ namespace Core
 
         public bool LoadClassifier()
         {
-            _mostAccurateTree = Utils.Deserialize<BTree<Shapelet>>(_decisionTreeFilepath);
+            _mostAccurateTree = Utils.Deserialize<DecisionTree<Shapelet>>(_decisionTreeFilepath);
 
             if (_mostAccurateTree != null)
             {

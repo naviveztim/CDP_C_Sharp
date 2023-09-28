@@ -12,7 +12,6 @@ namespace Core
         static string TRAIN_FILE_PATH = "";
         static string TEST_FILE_PATH = "";
         static string DELIMITER = ",";
-        static string DECISION_PATTERNS_FILE_PATH = "";
         static int COMPRESSION_FACTOR = 1;
         static bool USE_SIGNAL = true; 
         static bool NORMALIZE = false; 
@@ -22,8 +21,7 @@ namespace Core
         private static bool show_parameters()
         {
             Console.WriteLine();
-            Console.WriteLine("Concatenated decision paths (CDP) classification. (C) {0}",
-                               DateTime.Now.Year);
+            Console.WriteLine("Concatenated decision paths (CDP) classification. (C)");
             Console.WriteLine();
             Console.WriteLine("Train file: {0}", "\"" + TRAIN_FILE_PATH + "\"");
             Console.WriteLine("Test file: {0}", "\"" + TEST_FILE_PATH + "\"");
@@ -81,10 +79,7 @@ namespace Core
                 {
                     NUM_TREES = int.Parse(args[i + 1]);
                 }
-                else if (args[i].Contains("--patterns"))
-                {
-                    DECISION_PATTERNS_FILE_PATH = args[i + 1];
-                }
+                
             }
 
             if (args.Count() <= 1)
@@ -139,6 +134,7 @@ namespace Core
             }
 
         }
+
         private static void process()
         {
             var sw = new Stopwatch();

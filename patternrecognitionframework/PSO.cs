@@ -19,6 +19,7 @@ namespace Core
         {
             InitParticle(particleLength); 
         }
+
         private void InitParticle(int particleLength)
         {
             OptimalSplitDistance = -1.0;

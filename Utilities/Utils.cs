@@ -1,11 +1,7 @@
-﻿#define EARLY_ABANDON
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.ComponentModel;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 
@@ -40,18 +36,9 @@ namespace Utilities
 
     public class Utils
     {
-        public static int MAX_ANSWER_LENGTH = 1;
-
-        private static void _padAnswer(StringBuilder answer)
-        {
-            var padLength = Utils.MAX_ANSWER_LENGTH - answer.Length;
-
-            var padString = new StringBuilder().Insert(0, "0", padLength);
-
-            answer.Append(padString);
-        }
-
-        public static double EuclidianDistance(double[] array1, double[] array2, double currentMinDistance)
+        public static double EuclidianDistance(double[] array1
+                                               , double[] array2
+                                               , double currentMinDistance)
         {
             if ((array1 == null) || (array2 == null))
             {
@@ -98,9 +85,10 @@ namespace Utilities
             return entropy;
         }
 
-        public static void CalculateInformationGain(IOrderedEnumerable<HistogramItem> histogram, out double informationGain, 
-                                                                                                 out double optimalSplitDistance, 
-                                                                                                 out double entropy)
+        public static void CalculateInformationGain(IOrderedEnumerable<HistogramItem> histogram
+                                                    , out double informationGain
+                                                    , out double optimalSplitDistance
+                                                    , out double entropy)
         {
             informationGain = 0.0;
             optimalSplitDistance = 0.0;
@@ -109,8 +97,7 @@ namespace Utilities
             var all = histogram.Count();
 
             var minDistance = histogram.First().Distance;
-            //var maxDistance = histogram.Last().Distance;
-
+            
             var previousDistance = minDistance;
 
             foreach (var element in histogram)
@@ -153,12 +140,8 @@ namespace Utilities
             for (var k = 0; k < timeSeriesLen - candidateLen + 1; k++)
             {
                 Array.Copy(timeSeries.Values, k, currentArray, 0, candidateLen);
-#if EARLY_ABANDON
+                // Early abandon
                 minDistance = Math.Min(minDistance, EuclidianDistance(candidateValues, currentArray, minDistance)) ;
-                //minDistance = Math.Min(minDistance, EnergyDistance(candidateValues, currentArray, minDistance)); //?? 
-#else
-                minDistance = Math.Min(minDistance, EuclidianDistance(candidateValues, currentArray));
-#endif 
             }
 
             return minDistance;
@@ -215,40 +198,6 @@ namespace Utilities
             return serialized;
         }
 
-        public static void AddHistogramItem<T>(List<List<T>> histogram, T item, Func<T, double> func,  
-                                               double minValue, double maxValue)
-        {
-
-            if (histogram == null)
-                throw new InvalidDataException("histogram");
-
-            var numBins = histogram.Count;
-            var range = (maxValue - minValue);
-
-            var i = (int)(((func(item) - minValue) / range) * (numBins - 1));
-
-            histogram[i].Add(item);
-        }
-
-        public static IEnumerable<List<T>> CreateHistogram<T>(int numBeans, IEnumerable<T> extendedHistItems,
-                                                              Func<T, double> func, double minValue, double maxValue)
-        {
-            // Init histogram
-            var histogram = new List<List<T>>();
-            for (var i = 0; i < numBeans; i++)
-            {
-                histogram.Add(new List<T>());
-            }
-
-            // Create histogram
-            foreach (var item in extendedHistItems)
-            {
-                AddHistogramItem(histogram, item, func, minValue, maxValue);
-            }
-
-            return histogram;
-        }
-        
         public static double AverageValue(IList<double> array, int startIndex, int numElements)
         {
             if (array.Count < startIndex + numElements)
@@ -264,28 +213,11 @@ namespace Utilities
             return sumValue / numElements;
         }
 
-        public static double Std(IList<double> array, double average)
-        {
-            var sumValue = 0.0;
-            var numeElements = array.Count;
-            if (numeElements == 1)
-            {
-                return 0.0;
-            }
-            
-            for (var i = 0; i < numeElements; i++)
-            {
-                sumValue += (array[i] - average) * (array[i] - average);
-            }
-
-            return Math.Sqrt(sumValue/(numeElements - 1)); 
-        }
-
         public static double SimilarityCoefficient(string s1, string s2)
         {
             var result = 0.0;
-            var array1 = s1.ToArray(); // TEST 
-            var array2 = s2.ToArray(); // TEST 
+            var array1 = s1.ToArray(); 
+            var array2 = s2.ToArray(); 
 
 
             if (s1 == null || s2 == null)
@@ -300,12 +232,9 @@ namespace Utilities
                 throw new ArgumentException("input string");
             }
 
-            //var length = s1.Length;
-
             for (var i = 0; i < length; i++)
             {
-                //if (s1[i] == s2[i])
-                if (array1[i] == array2[i]) // TEST 
+                if (array1[i] == array2[i]) 
                 {
                     result += 1.0; 
                 }
@@ -314,35 +243,6 @@ namespace Utilities
             result /= length; 
 
             return result; 
-        }
-
-        public static double Similarity1NNCoefficient(string s1, string s2)
-        {
-            var array1 = s1.ToArray(); // TEST 
-            var array2 = s2.ToArray(); // TEST 
-            
-            if (s1 == null || s2 == null)
-            {
-                throw new ArgumentException("input string");
-            }
-
-            var length = s1.Length;
-
-            if (length != s2.Length)
-            {
-                throw new ArgumentException("input string");
-            }
-
-            //var length = s1.Length;
-            var distance = 0.0; 
-            for (var i = 0; i < length; i++)
-            {
-                var value1 = (float) Char.GetNumericValue(array1[i]);
-                var value2 = (float) Char.GetNumericValue(array2[i]); 
-                distance +=  (value1 - value2) * (value1 - value2);
-            }
-
-            return Math.Sqrt(distance);
         }
 
         public static double StdDev(IEnumerable<double> values)
@@ -365,7 +265,7 @@ namespace Utilities
             return ret;
         }
         
-        public static void Derivate(double[] signal)
+        public static void Derivative(double[] signal)
         {
             for (var i = signal.Length-1; i >= 1 ; i--)
             {
@@ -403,13 +303,20 @@ namespace Utilities
             }
         }
 
-        /*
-         * Permutation usage: 
-         * IEnumerable<IEnumerable<int>> result = GetPermutations(Enumerable.Range(1, 3), 3);
-         * Output - a list of integer-lists:
-         * {1,2,3} {1,3,2} {2,1,3} {2,3,1} {3,1,2} {3,2,1}
-         * 
-         */
+        public static void CompressATimeSeries(TimeSeries timeSeries, int compressionIndex)
+        {
+            var newTimeSeriesLength = timeSeries.Values.Length / compressionIndex;
+            var newValues = new double[newTimeSeriesLength];
+            var startIndex = 0;
+            for (var i = 0; i < newTimeSeriesLength; i++)
+            {
+                newValues[i] = AverageValue(timeSeries.Values, startIndex, compressionIndex);
+                startIndex += compressionIndex;
+            }
+
+            timeSeries.Values = newValues;
+        }
+
         public static IEnumerable<IEnumerable<T>> GetPermutations<T>(IEnumerable<T> list, int length)
         {
             if (length == 1) return list.Select(t => new T[] { t });
@@ -439,15 +346,15 @@ namespace Utilities
                     for (int i = arrayIndex + 1; i < array.Count(); i++)
                     {
 
-                        //add new List in the list to hold the new combination
+                        // Add new List in the list to hold the new combination
                         combinations.Add(new List<T>());
 
-                        //add the starting index element from “array”
+                        // Add the starting index element from “array”
                         combinations[combinationsListIndex].Add(array[arrayIndex]);
                         while (combinations[combinationsListIndex].Count < combinationLenght)
                         {
 
-                            //add until we come to the length of the combination
+                            // Add until we come to the length of the combination
                             combinations[combinationsListIndex].Add(array[i]);
                         }
                         combinationsListIndex++;
@@ -482,11 +389,8 @@ namespace Utilities
         #region Groups definitions
         ///
         /// Rules: 
-        /// 1. Make 3-, 4- class index members classification trees Ex. {1, 2, 3} and {1, 2, 3, 4}
-        /// 2. 3-members classification tree should overlap each other with one member, 4- class index classification
-        /// tree should overlap each other with two members. Ex: {1, 2, 3}- {3, 4, 5} and {1, 2, 3, 4}- {3, 4, 5, 6}
-        /// 3. Make tree managing agents with different set of classifiers (to have a majority of managing classifiers- at least two equal)
-        /// 4. Every class index should be seen equal number of times in managing agents (usually twice) Ex: {1, 2, 3}; {3, 4, 5}; {5, 1}, {4, 2} 
+        /// Try to create uniformly distributed group of indexes combinations 
+        /// Ex. [1, 2], [2, 3], [3, 1] - All numbers in given groups are shown twice
         /// 
 
         private static bool exceedMaxRepetitions(ICollection<IList<int>> selectedCombinations
@@ -636,19 +540,17 @@ namespace Utilities
             Console.WriteLine("(Might not exactly coinside with requested pattern length, as the process tries to keep uniform distribution of class labels.)\n");
         }
 
-        public static List<IList<int>> createSpecifiedGroup(List<int> classIndexes
+        public static List<IList<int>> createGroupOfIndexes(List<int> classIndexes
                                                       , int PatternLength
                                                       , int NumClassLabelsPerTree)
         {
-            //int maxRepetitionsPerGroup; 
             List<IList<int>> group;
             var allCombinations = Utils.GetCombinations(classIndexes, 0, NumClassLabelsPerTree); // TEST 
             var allCombinationsCount = allCombinations.Count();
 
             if (PatternLength <= allCombinationsCount)
             {
-                //maxRepetitionsPerGroup = (PatternLength * NumClassLabelsPerTree) / NumClassLabels;
-                group = Utils.createGroup(allCombinations, classIndexes);
+                group = createGroup(allCombinations, classIndexes);
             }
             else
             {
@@ -662,7 +564,6 @@ namespace Utilities
 
                 if (numRestGroups > 0)
                 {
-                    //maxRepetitionsPerGroup = PatternLength / NumClassLabels;
                     var smallGroup = createGroup(allCombinations, classIndexes);
                     group.AddRange(smallGroup);
                 }
