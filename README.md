@@ -6,6 +6,7 @@
 - Very small model size (usually less than 1MB)
 - Easily add new classes 
 - High accuracy (well comparable with state-of-the-art methods)
+- Does not depend on any other machine learning package
 
 Table 1. Training time and accuracy of **C# implementation** of CDP method
 
