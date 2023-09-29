@@ -2,10 +2,10 @@
  This is C# implementation of CDP (Concatenated Decisions Path) algorithm 
 
 ## Main advantages
-- Very fast to train
-- Very small model size 
+- Very fast to (re)train (usually less than a minute)
+- Very small model size (usually less than 1MB)
 - Easily add new classes 
-- High accuracy 
+- High accuracy (well comparable with state-of-the-art methods)
 
 Table 1. Training time and accuracy of **C# implementation** of CDP method
 
