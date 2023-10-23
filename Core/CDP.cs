@@ -162,7 +162,7 @@ namespace Core
             // The result may be based on an outlier, thus better option is to
             // use _getMostPopularIndexes(stringDecisionPattern)- although it might be slower
             //  
-            var mostPopularIndexes = _getMostLikelyIndexes(stringDecisionPattern); // _getMostPopularIndexes(stringDecisionPattern);
+            var mostPopularIndexes = _getMostPopularIndexes(stringDecisionPattern);  //_getMostLikelyIndexes(stringDecisionPattern); // 
             mostPopularIndexes.RemoveAll(i => i == int.MinValue);
 
             return (mostPopularIndexes.Count == 1) ? mostPopularIndexes[0] : int.MinValue;
