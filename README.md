@@ -1,7 +1,25 @@
-## CDP_C_Sharp
- This is C# implementation of CDP (Concatenated Decisions Path) algorithm 
+##  C# implementation of CDP (Concatenated Decisions Path) algorithm - fast and accurate algorithm for time series classification 
 
-## Main advantages
+## Overview 
+ CDP is a novel method for time-series classification using shapelets. The approach focuses on overcoming the limitations of traditional 
+ shapelet-based methods, primarily their slow training times, while maintaining high accuracy. Proposed algorithm 
+ involves training small decision trees and combining their decisions to form unique patterns for identifying time-series 
+ data. Method is tested on dataset from [UCR](https://www.cs.ucr.edu/~eamonn/time_series_data_2018/))
+
+## Build 
+ Clone the project and open solution with VisualStudio. Rebuild project. Build produces console application: CDPMethod.exe   
+
+## Run executable  
+ Example: 
+ CDPMethod.exe --train "<Filepath to train file>" 
+               --test "<Filepath to test file>"
+               --compress 2 
+               --pattern_length 1500 
+               --tree_size 2 
+               --norm N 
+               --signal S
+
+## Main characteristics 
 - Very fast to (re)train (usually less than a minute)
 - Very small model size (usually less than 1MB)
 - Easily add new classes 
@@ -78,12 +96,12 @@ cdp_project@outlook.com
 
 ### References: 
 
-_“Concatenated Decision Paths Classification for Datasets with Small Number of Class Labels”, Ivan Mitzev and N.H. Younan, ICPRAM, Porto, Portugal, 24-26 February 2017_
+“Concatenated Decision Paths Classification for Datasets with Small Number of Class Labels”, Ivan Mitzev and N.H. Younan, ICPRAM, Porto, Portugal, 24-26 February 2017
 
-_“Concatenated Decision Paths Classification for Time Series Shapelets”, Ivan Mitzev and N.H. Younan, International journal for Instrumentation and Control Systems (IJICS), Vol. 6, No. 1, January 2016_
+“Concatenated Decision Paths Classification for Time Series Shapelets”, Ivan Mitzev and N.H. Younan, International journal for Instrumentation and Control Systems (IJICS), Vol. 6, No. 1, January 2016
 
-_“Combined Classifiers for Time Series Shapelets”, Ivan Mitzev and N.H. Younan, CS & IT-CSCP 2016 pp. 173–182, Zurich, Switzerland, January 2016_
+“Combined Classifiers for Time Series Shapelets”, Ivan Mitzev and N.H. Younan, CS & IT-CSCP 2016 pp. 173–182, Zurich, Switzerland, January 2016
 
-_“Time Series Shapelets: Training Time Improvement Based on Particle Swarm Optimization”, Ivan Mitzev and N.H. Younan, IJMLC 2015 Vol. 5(4): 283-287 ISSN: 2010-3700_
+“Time Series Shapelets: Training Time Improvement Based on Particle Swarm Optimization”, Ivan Mitzev and N.H. Younan, IJMLC 2015 Vol. 5(4): 283-287 ISSN: 2010-3700
 
 
