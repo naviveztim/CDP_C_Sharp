@@ -131,6 +131,7 @@ namespace Core
          
         }
 
+        /*
         private List<int> _getMostLikelyIndexes(string decisionPattern)
         {
             // Fill out list with tuples <real class index, similarity between 
@@ -150,7 +151,7 @@ namespace Core
 
             return new List<int> { sortedSimilarityDistances[0].Item1 };
            
-        }
+        }*/
 
         private int _classify(TimeSeries timeSeries)
         {
