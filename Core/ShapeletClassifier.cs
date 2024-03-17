@@ -89,6 +89,7 @@ namespace Core
             return classifierPath;
         }
 
+        /*
         private static bool _buildTree(DecisionTree<Shapelet> tree
                                        , IEnumerable<Shapelet> permutation
                                        , int numClasses)
@@ -119,8 +120,9 @@ namespace Core
             var uniqueIndexes = addedIndexes.Select(a => a).Distinct().ToArray();
 
             return uniqueIndexes.Count() == numClasses;
-        }
+        }*/
 
+        /*
         private static bool _enlistedCombinationCompleted(IEnumerable<int> usedIndexes)
         {
             var usedIndexesArray = usedIndexes.ToArray();
@@ -139,7 +141,7 @@ namespace Core
             }
 
             return true;
-        }
+        }*/
 
         private static double _testTreeAccuracy(DecisionTree<Shapelet> tree, DataSet dataSet)
         {
@@ -372,11 +374,18 @@ namespace Core
                     // Create classification tree
                     var tree = new DecisionTree<Shapelet> { Root = new DecisionTree<Shapelet>.Node(permutation.First()) };
 
-                    if (!_buildTree(tree, permutation, dataSet.NumClasses))
+                    //if (!_buildTree(tree, permutation, dataSet.NumClasses))
+                    //{
+                    //    break;
+                    //}
+
+                    // Build tree
+                    foreach (var p in permutation)
                     {
-                        break;
+                        tree.Add(tree.Root, p); 
                     }
 
+                    // Test accuracy of so build tree
                     var result = _testTreeAccuracy(tree, dataSet);
                     if (bestResult < result)
                     {
