@@ -63,7 +63,7 @@ namespace Core
                 {
                     _classifiers.Add(classifier); 
                 }
-                //p++; 
+                
                 Console.Write("\rPercent trained decision trees: {0:F1}%", (p++ * 100.0) / numDecisionTrees);
             }
             Console.Write("\r                                                  ");
@@ -131,28 +131,6 @@ namespace Core
          
         }
 
-        /*
-        private List<int> _getMostLikelyIndexes(string decisionPattern)
-        {
-            // Fill out list with tuples <real class index, similarity between 
-            // incoming decision patterns and one kept as class index representation>
-            var similarityDistances = new List<Tuple<int, double>>();
-            foreach (var touple in _trainDecisionPatterens)
-            {
-                var trainClassIndex = touple.Item1;
-                var trainPattern = touple.Item2;
-
-                similarityDistances.Add(new Tuple<int, double>(trainClassIndex
-                                                               , Utils.SimilarityCoefficient(decisionPattern, trainPattern)));
-            }
-
-            // Sort the tuples by the similarity coefficients, in descending oreder 
-            var sortedSimilarityDistances = similarityDistances.OrderByDescending(tuple => tuple.Item2).ToList();
-
-            return new List<int> { sortedSimilarityDistances[0].Item1 };
-           
-        }*/
-
         private int _classify(TimeSeries timeSeries)
         {
             // Obtain decision pattern for gvrn time series 
@@ -163,7 +141,7 @@ namespace Core
             // The result may be based on an outlier, thus better option is to
             // use _getMostPopularIndexes(stringDecisionPattern)- although it might be slower
             //  
-            var mostPopularIndexes = _getMostPopularIndexes(stringDecisionPattern);  //_getMostLikelyIndexes(stringDecisionPattern); // 
+            var mostPopularIndexes = _getMostPopularIndexes(stringDecisionPattern); 
             mostPopularIndexes.RemoveAll(i => i == int.MinValue);
 
             return (mostPopularIndexes.Count == 1) ? mostPopularIndexes[0] : int.MinValue;
