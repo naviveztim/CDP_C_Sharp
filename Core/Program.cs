@@ -108,11 +108,6 @@ namespace Core
                                                             , List<int> classLabels
                                                             , List<List<double>> timeSeriesMatrix)
         {
-            if (!File.Exists(filePath))
-            {
-                return;
-            }
-
             foreach (var line in File.ReadLines(filePath))
             {
                 if (line.Equals(""))
@@ -127,7 +122,7 @@ namespace Core
                 var values = new double[numbers.Length - 1]; 
                 for (var i = 1; i < numbers.Length; i++)
                 {
-                    values[i - 1] = double.Parse(numbers[i], NumberStyles.Float);
+                    values[i - 1] = double.Parse(numbers[i], NumberStyles.AllowExponent|NumberStyles.Float);
                 }
 
                 timeSeriesMatrix.Add(values.ToList());

@@ -148,7 +148,9 @@ namespace Core
             var result = 0.0;
             foreach (var classIndex in dataSet.ClassIndexes)
             {
-                result += _testTreeOnGivenIndex(classIndex, tree, dataSet.TimeSeriesIndexes[classIndex]);
+                // result += _testTreeOnGivenIndex(classIndex, tree, dataSet.TimeSeriesIndexes[classIndex]);
+                var testDataSet = dataSet.TimeSeries.Where(t => t.ClassIndex == classIndex); 
+                result += _testTreeOnGivenIndex(classIndex, tree, testDataSet);
             }
 
             result /= dataSet.NumClasses;
