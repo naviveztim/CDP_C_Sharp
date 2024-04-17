@@ -89,66 +89,12 @@ namespace Core
             return classifierPath;
         }
 
-        /*
-        private static bool _buildTree(DecisionTree<Shapelet> tree
-                                       , IEnumerable<Shapelet> permutation
-                                       , int numClasses)
-        {
-            var candidatesForTree = permutation.ToArray();
-            var candidatesCount = candidatesForTree.Count();
-            var addedIndexes = new List<int>();
-
-            var i = 0;
-            while (candidatesForTree.Any(t => t != null) && !_enlistedCombinationCompleted(addedIndexes))
-            {
-                var shapelet = candidatesForTree[i];
-                if (null != shapelet && tree.Add(tree.Root, shapelet))
-                {
-                    addedIndexes.Add(shapelet.LeftClassIndex);
-                    addedIndexes.Add(shapelet.RightClassIndex);
-
-                    candidatesForTree[i] = null;
-                }
-
-                i++;
-                if (i == candidatesCount)
-                {
-                    i = 0;
-                }
-            }
-
-            var uniqueIndexes = addedIndexes.Select(a => a).Distinct().ToArray();
-
-            return uniqueIndexes.Count() == numClasses;
-        }*/
-
-        /*
-        private static bool _enlistedCombinationCompleted(IEnumerable<int> usedIndexes)
-        {
-            var usedIndexesArray = usedIndexes.ToArray();
-            if (!usedIndexesArray.Any())
-            {
-                return false;
-            }
-            var uniqueIndexes = usedIndexesArray.Select(a => a).Distinct().ToArray();
-            foreach (int index in uniqueIndexes)
-            {
-                var count = uniqueIndexes.Count(t => t == index);
-                if (count > 0 || count != 2)
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }*/
-
+        
         private static double _testTreeAccuracy(DecisionTree<Shapelet> tree, DataSet dataSet)
         {
             var result = 0.0;
             foreach (var classIndex in dataSet.ClassIndexes)
             {
-                // result += _testTreeOnGivenIndex(classIndex, tree, dataSet.TimeSeriesIndexes[classIndex]);
                 var testDataSet = dataSet.TimeSeries.Where(t => t.ClassIndex == classIndex); 
                 result += _testTreeOnGivenIndex(classIndex, tree, testDataSet);
             }
@@ -375,11 +321,6 @@ namespace Core
                 {
                     // Create classification tree
                     var tree = new DecisionTree<Shapelet> { Root = new DecisionTree<Shapelet>.Node(permutation.First()) };
-
-                    //if (!_buildTree(tree, permutation, dataSet.NumClasses))
-                    //{
-                    //    break;
-                    //}
 
                     // Build tree
                     foreach (var p in permutation)

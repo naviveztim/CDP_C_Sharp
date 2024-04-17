@@ -11,7 +11,6 @@ namespace Utilities
     {
         public string DirectoryName { get; private set;}       
         public List<TimeSeries> TimeSeries { get; private set;}
-        //public Dictionary<int, IEnumerable<TimeSeries>> TimeSeriesIndexes { get; private set;}
         public int NumClasses { get; private set;}
         public List<int> ClassIndexes { get; private set;}
         public int MinLength { get; private set;}
@@ -45,7 +44,6 @@ namespace Utilities
                 Step = 1;
             }
 
-            //_updateTimeSeriesIndexesDataSet();
         }
         
         public DataSet Clone(ICollection<int> classesInDataSet)
@@ -56,8 +54,6 @@ namespace Utilities
             newDataSet.ClassIndexes = classesInDataSet.ToList();
             newDataSet.NumClasses = classesInDataSet.Count;
             newDataSet.TimeSeries = newDataSet.TimeSeries.Where(t => classesInDataSet.Contains(t.ClassIndex)).ToList();
-
-            //newDataSet._updateTimeSeriesIndexesDataSet();
 
             return newDataSet;
         }
@@ -85,7 +81,6 @@ namespace Utilities
                 }
 
                 newDataSet.TimeSeries = newTimeSeries;
-                //newDataSet._updateTimeSeriesIndexesDataSet();
 
             }
 
@@ -152,19 +147,6 @@ namespace Utilities
             return dataSet; 
         }
 
-        /*
-        private void _updateTimeSeriesIndexesDataSet()
-        {
-            if (NumClasses > 0)
-            {
-                TimeSeriesIndexes = new Dictionary<int, IEnumerable<TimeSeries>>();
-                foreach (var classIndex in ClassIndexes)
-                {
-                    var timeSeriesList = TimeSeries.Where(t => (t.ClassIndex == classIndex)).ToList();
-                    TimeSeriesIndexes.Add(classIndex, timeSeriesList);
-                }
-            }
-        }*/
     }
 }
 
