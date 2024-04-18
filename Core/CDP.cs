@@ -158,20 +158,11 @@ namespace Core
 
         }
 
-        public void Fit(IList<int> classLabels, IEnumerable<IEnumerable<double>> timeSeriesMatrix)
+        public void Fit(DataSet trainDataSet)
         {
-            var classIndexes = new List<int>();
-            classIndexes.AddRange(classLabels.Distinct().OrderBy(x => x)); 
-
-            // Load dataset and preprocess
-            var trainDataSet = new DataSet(classLabels
-                                           , timeSeriesMatrix
-                                           , _compressonFactor
-                                           , _useSignal
-                                           , _normalize);
-
+            
             // Create decision trees and add them into a list 
-            _createAndTrainClassifiers(classIndexes, trainDataSet);
+            _createAndTrainClassifiers(trainDataSet.ClassIndexes.Distinct().OrderBy(x => x).ToList(), trainDataSet);
 
             // Collect and aggregate decission paths for every decision tree 
             // [(1, 'LLRLLR0LLLL')
@@ -181,22 +172,23 @@ namespace Core
 
         }
 
-        public List<int> Predict(IEnumerable<IEnumerable<double>> timeSeriesMatrix)
+        public List<int> Predict(DataSet testDataSet)
         {
             Console.Write("Classifying...");
             var classifiedLabels = new List<int>();
 
             // Create test dataset from given sample and pre-process in same way as trained dataset
             //var seriesMatrix = timeSeriesMatrix as IEnumerable<double>[] ?? timeSeriesMatrix.ToArray();
-            var indexes = Enumerable.Repeat(-1, timeSeriesMatrix.Count()).ToList();
+            /*var indexes = Enumerable.Repeat(-1, timeSeriesMatrix.Count()).ToList();
             var testDataSet = new DataSet(indexes, timeSeriesMatrix.ToArray(), _compressonFactor, _useSignal, _normalize);
+            */
 
             // Get pre-processed time series and classify them 
-            var timeSeriesArray = testDataSet.TimeSeries.ToArray();
-            for (var i = 0; i < timeSeriesArray.Length; i++)
+            //var timeSeriesArray = testDataSet.TimeSeries.ToArray();
+            //for (var i = 0; i < timeSeriesArray.Length; i++)
+            foreach (var series in testDataSet.TimeSeries)
             {
-                var resultIndex = _classify(timeSeriesArray[i]);
-                classifiedLabels.Add(resultIndex);
+                classifiedLabels.Add(_classify(series));
             }
 
             return classifiedLabels;

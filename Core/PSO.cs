@@ -46,7 +46,7 @@ namespace Core
     {
         public CandidateShapelet BestParticle;
         private readonly List<CandidateShapelet> _swarm = new List<CandidateShapelet>();
-        private readonly Random _ran = new Random(123); 
+        private readonly Random _ran = new Random(); 
         private int _maxParticleLength;
         private int _minParticleLength;
         private int _step;

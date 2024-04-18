@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
-using System.IO;
 using System.Linq;
 
 namespace Core
@@ -41,6 +38,7 @@ namespace Core
 
             return true; 
         }
+
         private static void parse_arguments(string[] args)
         {
             for (var i = 0; i < args.Count(); i++)
@@ -88,6 +86,7 @@ namespace Core
                 return;
             }
         }
+
         private static void usage()
         {
             Console.WriteLine();
@@ -103,33 +102,7 @@ namespace Core
             Console.WriteLine("\t[--pattern_length (1,...)");
             Console.WriteLine(); 
         }
-        private static void generateTimeSeriesMatrixFromFile(string filePath
-                                                            , string delimiter
-                                                            , List<int> classLabels
-                                                            , List<List<double>> timeSeriesMatrix)
-        {
-            foreach (var line in File.ReadLines(filePath))
-            {
-                if (line.Equals(""))
-                {
-                    continue; 
-                }
-
-                // Index of the class must be written at the front of the line 
-                var numbers = line.Split(delimiter.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-
-                classLabels.Add((int)double.Parse(numbers.First()));
-                var values = new double[numbers.Length - 1]; 
-                for (var i = 1; i < numbers.Length; i++)
-                {
-                    values[i - 1] = double.Parse(numbers[i], NumberStyles.AllowExponent|NumberStyles.Float);
-                }
-
-                timeSeriesMatrix.Add(values.ToList());
-            }
-
-        }
-
+        
         private static void process()
         {
             var sw = new Stopwatch();
@@ -147,35 +120,35 @@ namespace Core
                                 , NORMALIZE
                                 , NUM_CLASS_LABELS_PER_TREE);
 
-            // Obtain train dataset
-            var trainClassLabels = new List<int>();
-            var trainTimeSeriesMatrix = new List<List<double>>();
-            generateTimeSeriesMatrixFromFile(TRAIN_FILE_PATH
-                                             , DELIMITER
-                                             , trainClassLabels
-                                             , trainTimeSeriesMatrix);
+            // Construct train dataset
+            var trainDataSet = new Utilities.DataSet(TRAIN_FILE_PATH
+                                                     , DELIMITER
+                                                     , COMPRESSION_FACTOR
+                                                     , USE_SIGNAL
+                                                     , NORMALIZE);                
 
             // Fit model 
-            model.Fit(trainClassLabels, trainTimeSeriesMatrix);
+            model.Fit(trainDataSet);
 
             sw.Stop();
             averageTrainingTime += sw.ElapsedMilliseconds;
 
             // ----- Testing -----
 
-            // Obtain test dataset
-            var testClassLabels = new List<int>();
-            var testTimeSeriesMatrix = new List<List<double>>();
-            generateTimeSeriesMatrixFromFile(TEST_FILE_PATH
-                                             , DELIMITER
-                                             , testClassLabels
-                                             , testTimeSeriesMatrix);
+            // Construct test dataset
+            var testDataSet = new Utilities.DataSet(TEST_FILE_PATH
+                                                    , DELIMITER
+                                                    , COMPRESSION_FACTOR
+                                                    , USE_SIGNAL
+                                                    , NORMALIZE
+                                                    );
 
             // Predict
-            var resultClassLabels = model.Predict(testTimeSeriesMatrix);
+            var resultClassLabels = model.Predict(testDataSet);
 
             // Evaluate results 
             var countSame = 0;
+            var testClassLabels = testDataSet.TimeSeries.Select(ts => ts.ClassIndex).ToList();
             var countAll = resultClassLabels.Count();
             for (var j = 0; j < countAll; j++)
             {
@@ -196,6 +169,7 @@ namespace Core
             Console.Read();
             Console.Read();
         }
+
         static void Main(string[] args)
         {
             try

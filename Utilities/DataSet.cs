@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -17,20 +18,61 @@ namespace Utilities
         public int MaxLength { get; private set;}
         public int Step { get; private set; }
 
-        public DataSet(IList<int> classIndexes
-                       , IEnumerable<IEnumerable<double>> timeSeriesMatrix
+        public DataSet(string filePath
+                       , string delimiter
                        , int compressionIndex
                        , bool useSignal
-                       , bool normalize )
+                       , bool normalize
+                       )
         {
+            // Read file 
+            var classLabels = new List<int>();
+            var timeSeriesMatrix = new List<double[]>();
+
+            foreach (var line in File.ReadLines(filePath))
+            {
+                if (string.IsNullOrWhiteSpace(line))
+                {
+                    continue;
+                }
+
+                // Index of the class must be written at the front of the line 
+                var numbers = line.Split(delimiter.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+                if (numbers.Length == 0) continue; // Skip lines that are just delimiters
+
+                // Parse class label from the begining of the line 
+                if (!double.TryParse(numbers[0], NumberStyles.Any, CultureInfo.InvariantCulture, out double classLabel))
+                {
+                    continue; 
+                }
+                classLabels.Add((int)classLabel);
+
+                // Parse time series values from the line 
+                var values = new double[numbers.Length - 1];
+                bool valid = true;
+                for (int i = 1; i < numbers.Length; i++)
+                {
+                    if (!double.TryParse(numbers[i], NumberStyles.AllowExponent | NumberStyles.Number, CultureInfo.InvariantCulture, out values[i - 1]))
+                    {
+                        valid = false;
+                        break; 
+                    }
+                }
+
+                // Skip this line if any number failed to parse
+                if (!valid) continue; 
+
+                timeSeriesMatrix.Add(values);
+            }
+
             // Set parameters 
             DirectoryName = Directory.GetCurrentDirectory();
-            ClassIndexes = classIndexes.Distinct().ToList();
+            ClassIndexes = classLabels.Distinct().ToList();
             NumClasses = ClassIndexes.Count;
             MinLength = 3;
 
             // Pre-process time series 
-            TimeSeries = _preProcessTimeSeries(classIndexes
+            TimeSeries = _preProcessTimeSeries(classLabels
                                                 , timeSeriesMatrix
                                                 , compressionIndex
                                                 , useSignal
@@ -38,14 +80,14 @@ namespace Utilities
 
             // Define max length and step base on processed time series 
             MaxLength = (TimeSeries.Max(s => s.Values.Count()));
-            Step = (MaxLength - MinLength) / 20;  
+            Step = (MaxLength - MinLength) / 20;
             if (NumClasses <= 4 || Step == 0)
             {
                 Step = 1;
             }
 
         }
-        
+
         public DataSet Clone(ICollection<int> classesInDataSet)
         {
             // Create Dataset with selected class indexes 
