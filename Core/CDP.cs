@@ -177,15 +177,6 @@ namespace Core
             Console.Write("Classifying...");
             var classifiedLabels = new List<int>();
 
-            // Create test dataset from given sample and pre-process in same way as trained dataset
-            //var seriesMatrix = timeSeriesMatrix as IEnumerable<double>[] ?? timeSeriesMatrix.ToArray();
-            /*var indexes = Enumerable.Repeat(-1, timeSeriesMatrix.Count()).ToList();
-            var testDataSet = new DataSet(indexes, timeSeriesMatrix.ToArray(), _compressonFactor, _useSignal, _normalize);
-            */
-
-            // Get pre-processed time series and classify them 
-            //var timeSeriesArray = testDataSet.TimeSeries.ToArray();
-            //for (var i = 0; i < timeSeriesArray.Length; i++)
             foreach (var series in testDataSet.TimeSeries)
             {
                 classifiedLabels.Add(_classify(series));

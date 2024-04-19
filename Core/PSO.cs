@@ -46,7 +46,7 @@ namespace Core
     {
         public CandidateShapelet BestParticle;
         private readonly List<CandidateShapelet> _swarm = new List<CandidateShapelet>();
-        private readonly Random _ran = new Random(); 
+        private readonly Random _ran = new Random();
         private int _maxParticleLength;
         private int _minParticleLength;
         private int _step;
@@ -150,6 +150,22 @@ namespace Core
             }
         }
 
+        private double _GenerateNormal1(Random rng, double mean = 0, double stdDev = 1)
+        {
+            double u1 = 1.0 - rng.NextDouble(); //uniform(0,1] random doubles
+            double randStdNormal = Math.Sqrt(-2.0 * Math.Log(u1)) *
+                                   Math.Sin(2.0 * Math.PI * u1); 
+            return mean + stdDev * randStdNormal;
+        }
+
+        private double _GenerateNormal2(Random rng, double mean = 0, double stdDev = 1)
+        {
+            double u1 = 1.0 - rng.NextDouble(); //uniform(0,1] random doubles
+            double randStdNormal = Math.Sqrt(-2.0 * Math.Log(u1)) *
+                                   Math.Cos(2.0 * Math.PI * u1);
+            return mean + stdDev * randStdNormal;
+        }
+
         public void StartPSO()
         {
             var iteration = 0;
@@ -165,8 +181,8 @@ namespace Core
                     // Update velocities of the current particle 
                     for (var j = 0; j < particle.Velocity.Length; j++)
                     {
-                        R1 = _ran.NextDouble();
-                        R2 = _ran.NextDouble();
+                        R1 = _GenerateNormal1(_ran);  // _ran.NextDouble();
+                        R2 = _GenerateNormal2(_ran);  // _ran.NextDouble();
 
                         particle.Velocity[j] = W*particle.Velocity[j] +
                                                C1*R1*(particle.BestPosition[j] - particle.Position[j]) +
