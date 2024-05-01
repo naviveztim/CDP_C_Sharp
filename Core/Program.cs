@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
+using Utilities; 
 
 namespace Core
 {
@@ -113,6 +114,13 @@ namespace Core
 
             // ----- Training -----
 
+            // Construct train dataset
+            var trainDataSet = new DataSet(TRAIN_FILE_PATH
+                                            , DELIMITER
+                                            , COMPRESSION_FACTOR
+                                            , USE_SIGNAL
+                                            , NORMALIZE);
+
             // Create model 
             var model = new Cdp(NUM_TREES
                                 , COMPRESSION_FACTOR
@@ -120,12 +128,6 @@ namespace Core
                                 , NORMALIZE
                                 , NUM_CLASS_LABELS_PER_TREE);
 
-            // Construct train dataset
-            var trainDataSet = new Utilities.DataSet(TRAIN_FILE_PATH
-                                                     , DELIMITER
-                                                     , COMPRESSION_FACTOR
-                                                     , USE_SIGNAL
-                                                     , NORMALIZE);                
 
             // Fit model 
             model.Fit(trainDataSet);

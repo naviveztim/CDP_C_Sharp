@@ -118,24 +118,5 @@ namespace Utilities
 
             return result; 
         }
-
-        public override string ToString()
-        {
-            var treeNodesString = "ROOT: "; 
-            
-            PrintPreorder(Root, ref treeNodesString);
-
-            return treeNodesString; 
-        }
-
-        public void PrintPreorder(Node node, ref string traverseString)
-        {
-            if (node != null)
-            {
-                traverseString += node.ToString();
-                PrintPreorder(node.Left, ref traverseString);
-                PrintPreorder(node.Right, ref traverseString);
-            }
-        }
     }
 }
