@@ -36,22 +36,6 @@ namespace Utilities
                 Right = null; 
             }
 
-            public override string ToString()
-            {
-                var propertyRepresentation = ""; 
-                var propertiesInfo = Data.GetType().GetProperties();
-                foreach (var propertyInfo in propertiesInfo)
-                {
-                    propertyRepresentation += String.Format("{0} : {1} ; ", 
-                                        propertyInfo.Name, propertyInfo.GetValue(Data, new object[]{})); 
-                }
-
-                if ((Left == null) && (Right == null))
-                {
-                    return String.Format("LEAF: Depth: {0}, {1}\n", Depth, propertyRepresentation); 
-                }
-                return String.Format("Depth: {0}, {1}\n", Depth, propertyRepresentation); 
-            }
         }
 
         public Node Root
