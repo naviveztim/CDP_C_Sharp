@@ -11,6 +11,7 @@
 
 ## Run executable  
  Example: 
+ ```sh
  CDPMethod.exe --train "<Filepath to train file>" 
                --test "<Filepath to test file>"
                --compress 2 
@@ -18,6 +19,12 @@
                --tree_size 2 
                --norm N 
                --signal S
+```
+
+### Donate
+If you like this project, consider supporting me by donating.
+
+[![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate/?hosted_button_id=E7U5FRCCUVNL6)
 
 ## Main characteristics 
 - Very fast to (re)train (usually less than a minute)

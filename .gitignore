@@ -2,3 +2,13 @@
 /Utilities/obj/
 /Core/bin/
 /Core/obj/
+/.vs/CDPMethodFramework/FileContentIndex/cd2467ee-2488-452e-b94d-99589e5e99b1.vsidx
+*.testlog
+*.manifest
+*.suo
+/.vs/CDPMethodFramework/v17/DocumentLayout.json
+*.wsuo
+/.vs/CDP_C_Sharp/v17/DocumentLayout.json
+/.vs
+/Core/Core.csproj.user
+/Core/app.config
