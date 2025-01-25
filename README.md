@@ -98,8 +98,8 @@ averageAccuracy += (countSame / (float)countAll);
 Console.WriteLine("Average accuracy: {0:N2}%", averageAccuracy*100.0);
 </pre>
 
-### Contacts: 
-cdp_project@outlook.com
+### Website: 
+[cdp-project.com](https://cdp-project.com)
 
 ### References: 
 
